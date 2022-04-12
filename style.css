@@ -1,14 +1,16 @@
-body{
-    margin: 0;   /*to the ancestor container*/
-    overflow: hidden; /*hides the scroll bar */
+body {
+    margin: 0;
+    overflow: hidden;
+    font-size: 14px;
 }
 
-*{
+* {
     box-sizing: border-box;
 }
+
 .container {
     height: 100vh;
-    
+    position: relative;
 }
 
 .title-bar {
@@ -18,25 +20,21 @@ body{
     justify-content: center;
     align-items: center;
     color: #fff;
-    
 }
 
 .menu-bar {
     height: 5vh;
     background-color: #107c41;
     display: flex;
-    
-    
 }
 
 .menu-item {
     padding-left: 10px;
     padding-right: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     color: #fff;
     font-size: 18px;
+    display: flex;
+    align-items: center;
 }
 
 .menu-item.selected {
@@ -49,10 +47,11 @@ body{
     cursor: pointer;
 }
 
-.menu-item.selected:hover{
+.menu-item.selected:hover {
     background-color: #fff;
     cursor: default;
-}
+} 
+
 .menu-icon-bar {
     height: 6vh;
     background-color: rgb(241, 241, 241);
@@ -61,12 +60,11 @@ body{
 }
 
 .menu-icon {
-    padding-left: 10px;
-    padding-right: 10px;
-    height: 100%;
-    display: flex;
-    padding-top: 7px;
-    align-items: center; /*aligns the item in center vertically*/
+   padding-left: 10px;
+   padding-right: 10px;
+   height: 100%;
+   display: flex;
+   align-items: center;
 }
 
 .menu-icon:hover {
@@ -76,9 +74,10 @@ body{
 
 .font-family-selector {
     width: 150px;
-    
+    font-family: 'Noto Sans';
 }
-.selector{
+
+.selector {
     height: 30px;
     font-size: 18px;
 }
@@ -86,6 +85,7 @@ body{
 .selector option {
     font-size: 18px;
 }
+
 .formula-bar {
     height: 5vh;
     display: flex;
@@ -99,8 +99,8 @@ body{
     height: 75vh;
     display: flex;
     flex-wrap: wrap;
-   
 }
+
 .select-all {
     width: 30px;
     height: 30px;
@@ -163,7 +163,6 @@ body{
     display: flex;
 }
 .sheet-tab {
-    border-bottom: 4px solid #107c41;
     padding-left: 10px;
     padding-right: 10px;
     display: flex;
@@ -171,7 +170,7 @@ body{
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    border-right: 1px solid lightgray
+    border-right: 1px solid lightgray;
 }
 
 .sheet-tab.selected {
@@ -188,9 +187,8 @@ body{
     background-color: #fff;
 }
 
-
 .column-name {
-    min-width:100px;
+    min-width: 100px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -204,23 +202,26 @@ body{
     align-items: center;
     min-height: 25px;
     border-bottom: 1px solid lightgray;
+    font-weight: bold;
 }
 
-.cell-row{
+.cell-row {
     display: flex;
 }
-.input-cell{
+
+.input-cell {
     min-width: 100px;
     min-height: 25px;
-    border-right: 1px solid black;
-    border-bottom: 1px solid black;
+    border-right: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
     outline-color: #107c41;
+    font-size: 14px;
+    font-family: 'Noto Sans';
 }
 
 .input-cell.selected {
     border: 2px solid #107c41;
 }
-
 
 .formula-editor {
     height: 70%;
@@ -250,7 +251,20 @@ body{
 
 .menu-icon.selected {
     background-color: lightgray;
-
 }
 
+.input-cell.top-cell-selected {
+    border-top: none;
+}
 
+.input-cell.bottom-cell-selected {
+    border-bottom: 1px solid lightgray;
+}
+
+.input-cell.right-cell-selected {
+    border-right: 1px solid lightgray;
+}
+
+.input-cell.left-cell-selected {
+    border-left: none;
+}
