@@ -1,6 +1,25 @@
+let defaultProperties = {
+    text: "",
+    "font-weight": "",
+    "font-style": "",
+    "text-decoration": "",
+    "text-align": "left",
+    "background-color": "white",
+    "color": "black",
+    "font-family": "Noto Sans",
+    "font-size": 14
+}
+
 $( document ).ready(function() {
     let cellContainer = $(".input-cell-container");
    
+    function findRowCol(ele){
+        let idArray = $(ele).attr("id").split("-");
+        let rowId = parseInt(idArray[1]);
+        let colId = parseInt(idArray[3]);
+
+        return [rowId,colId];
+    }
     //column and row display logic
     for(let i = 1;i<=100;i++){
         let ans = "";
@@ -44,29 +63,17 @@ $( document ).ready(function() {
     $(".style-icon").click(function(){
         $(this).toggleClass("selected");
     })
+   
 
-    $(".input-cell").click(function (e) {
-       
-        
-            //top selected or not
-       let idArray = $(this).attr("id").split("-");
-       let rowId = parseInt(idArray[1]);
-       let colId = parseInt(idArray[3]);
-     let topCell = $(`#row-${rowId-1}-col-${colId}`);
-     let bottomCell = $(`#row-${rowId+1}-col-${colId}`);
-     let leftCell = $(`#row-${rowId}-col-${colId-1}`);
-     let rightCell = $(`#row-${rowId}-col-${colId+1}`);
 
-     if($(this).hasClass("selected")){
-         unselectCell(this, e, topCell, bottomCell, leftCell, rightCell);
-     }
-     else{
-        selectCell(this, e, topCell, bottomCell, leftCell, rightCell);
-     }
-      
-      
-       
-    });
+    function getTopBottomLeftRightCell(rowId, colId) {
+        let topCell = $(`#row-${rowId - 1}-col-${colId}`);
+        let bottomCell = $(`#row-${rowId + 1}-col-${colId}`);
+        let leftCell = $(`#row-${rowId}-col-${colId - 1}`);
+        let rightCell = $(`#row-${rowId}-col-${colId + 1}`);
+        return [topCell, bottomCell, leftCell, rightCell];
+    }
+    
     function unselectCell(ele, e, topCell, bottomCell, leftCell, rightCell){
         if(e.ctrlKey && $(ele).attr("contenteditable") == "false"){
             if($(ele).hasClass("top-selected")){
@@ -84,35 +91,33 @@ $( document ).ready(function() {
             $(ele).removeClass("selected top-selected bottom-selected right-selected left-selected");
         }
     }
+
+    function selectCell(ele,e, topCell, bottomCell, leftCell, rightCell, mouseSelection){
     
-    function selectCell(ele,e, topCell, bottomCell, leftCell ,rightCell){
-    
-        if(e.ctrlKey){
-            let idArray = $(ele).attr("id").split("-");
-            let rowId = parseInt(idArray[1]);
-            let colId = parseInt(idArray[3]);
-        if(rowId != 0){
-            
+        if(e.ctrlKey || mouseSelection){
+           
+  
+            let topSelected;
             topSelected = topCell.hasClass("selected");
-        }
+       
         let bottomSelected;
         
-        if(rowId != 100){
+     
             
             bottomSelected = bottomCell.hasClass("selected");
-        }
+      
         let rightSelected;
        
-        if(colId != 100){
+       
             
             rightSelected = rightCell.hasClass("selected");
-        }
+ 
         let leftSelected;
        
-        if(colId != 0){
+       
            
             leftSelected = leftCell.hasClass("selected");
-        }
+      
     
         if(topSelected){
             topCell.addClass("bottom-selected");
@@ -143,13 +148,32 @@ $( document ).ready(function() {
          $(ele).addClass("selected");
     }
 
-    $(".input-cell").dblclick(function(){
+    $(".input-cell").click(function (e) {
+       
+        let [rowId,colId] = findRowCol(this);
+
+        let [topCell, bottomCell, leftCell, rightCell] = getTopBottomLeftRightCell(rowId, colId);
+            //top selected or not
+      
+
+     if($(this).hasClass("selected") && e.ctrlKey){
+         unselectCell(this, e, topCell, bottomCell, leftCell, rightCell);
+     }
+     else{
+        selectCell(this, e, topCell, bottomCell, leftCell, rightCell, false);
+     }
+      
+});
+   
+    
+   $(".input-cell").dblclick(function(){
         $(".input-cell.selected").removeClass("selected");
         $(this).addClass("selected");
         $(this).attr("contenteditable", "true");
         $(this).focus();
         $(this).attr('spellcheck', false);
     })
+
     $(".input-cell").blur(function(){
         $(".input-cell.selected").attr("contenteditable", "false");
     })
@@ -158,7 +182,7 @@ $( document ).ready(function() {
         $(".column-name-container").scrollLeft(this.scrollLeft);
         $(".row-name-container").scrollTop(this.scrollTop);
     })
-});
+
 
 
 function updateCell(property, value){
@@ -194,16 +218,44 @@ $(".icon-underline").click(function(){
 })
 
 let mousemoved = false;
-
+let startCellStored = false;
+let startCell;
+let endCell;
 $(".input-cell").mousemove(function(event){
-    // if(event.buttons == 1){
-    //     mousemoved = true;
-    //     console.log(event.target, event.buttons);
-    // }
-    // else if(mousemoved){
-    //     mousemoved = false;
-    //     console.log(event.target, event.buttons);
-    // }
-    console.log(mousemoved);
+    event.preventDefault();
+    if(event.buttons == 1 && !event.ctrlKey){
+        $(".input-cell.selected").removeClass("selected top-selected bottom-selected left-selected right-selected")
+        mousemoved = true;
+        if(!startCellStored){
+            let [rowId, colId] = findRowCol(event.target);
+            startCell = {rowId : rowId, colId : colId};
+            startCellStored = true;
+        }
+        else{
+            let [rowId, colId] = findRowCol(event.target);
+            endCell = {rowId: rowId, colId: colId};
+            selectAllBetweenTheRange(startCell, endCell);
+        }
+        
+       
+    }
+    else if(event.buttons == 0 && mousemoved){
+        mousemoved = false;
+        startCellStored = false;
+      
+       
+    }
+   
 })
 
+function selectAllBetweenTheRange(start, end){
+    for (let i = (start.rowId < end.rowId ? start.rowId : end.rowId); i <= (start.rowId < end.rowId ? end.rowId : start.rowId); i++) {
+        for (let j = (start.colId < end.colId ? start.colId : end.colId); j <= (start.colId < end.colId ? end.colId : start.colId); j++) {
+            let [topCell, bottomCell, leftCell, rightCell] = getTopBottomLeftRightCell(i, j);
+            selectCell($(`#row-${i}-col-${j}`)[0], {}, topCell, bottomCell, leftCell, rightCell, true);
+        }
+    }
+}
+
+
+});
