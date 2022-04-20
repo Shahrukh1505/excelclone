@@ -1,3 +1,4 @@
+
 let defaultProperties = {
     text: "",
     "font-weight": "",
@@ -55,14 +56,19 @@ $( document ).ready(function() {
     }
 
     //selection of alignment icons
-    $(".align-icon").click(function(){
-        $(".align-icon.selected").removeClass("selected");
-        $(this).addClass("selected");
-    })
+    // $(".align-icon").click(function(){
+    //     if($(this).hasClass("selected")){
+    //     $(this).removeClass("selected");
+    //     }
+    //     else{
+    //     $(this).addClass("selected");
+    //     }
+       
+    // })
 
-    $(".style-icon").click(function(){
-        $(this).toggleClass("selected");
-    })
+    // $(".style-icon").click(function(){
+    //     $(this).toggleClass("selected");
+    // })
    
 
 
@@ -185,36 +191,72 @@ $( document ).ready(function() {
 
 
 
-function updateCell(property, value){
-    $(".input-cell.selected").each(function(){
-        $(this).css(property, value);
-    })
+
+function updateCell(property, value) {
+    let prevCellData = JSON.stringify(cellData);
+    if (value != defaultProperties[property]) {
+        $(".input-cell.selected").each(function (index, data) {
+            let [rowId, colId] = findRowCol(data);
+            if (cellData[selectedSheet][rowId - 1] == undefined) {
+                cellData[selectedSheet][rowId - 1] = {};
+                cellData[selectedSheet][rowId - 1][colId - 1] = { ...defaultProperties};
+                cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+            } else {
+                if (cellData[selectedSheet][rowId - 1][colId - 1] == undefined) {
+                    cellData[selectedSheet][rowId - 1][colId - 1] = { ...defaultProperties};
+                    cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+                } else {
+                    cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+                }
+            }
+        });
+    } else {
+        $(".input-cell.selected").each(function (index, data) {
+            let [rowId, colId] = findRowCOl(data);
+            if (cellData[selectedSheet][rowId - 1] && cellData[selectedSheet][rowId - 1][colId - 1]) {
+                cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+                if (JSON.stringify(cellData[selectedSheet][rowId - 1][colId - 1]) == JSON.stringify(defaultProperties)) {
+                    delete cellData[selectedSheet][rowId - 1][colId - 1];
+                    if (Object.keys(cellData[selectedSheet][rowId - 1]).length == 0) {
+                        delete cellData[selectedSheet][rowId - 1];
+                    }
+                }
+            }
+        });
+    }
+    if (saved && JSON.stringify(cellData) != prevCellData) {
+        saved = false;
+    }
+}
+function setFontStyle(ele, property, key, value) {
+    if ($(ele).hasClass("selected")) {
+        $(ele).removeClass("selected");
+        $(".input-cell.selected").css(key, "");
+        // $(".input-cell.selected").each(function (index, data) {
+        //     let [rowId, colId] = findRowCOl(data);
+        //     cellData[selectedSheet][rowId - 1][colId - 1][property] = false;
+        // });
+        updateCell(property, false);
+    } else {
+        $(ele).addClass("selected");
+        $(".input-cell.selected").css(key, value);
+        // $(".input-cell.selected").each(function (index, data) {
+        //     let [rowId, colId] = findRowCOl(data);
+        //     cellData[selectedSheet][rowId - 1][colId - 1][property] = true;
+        // });
+        updateCell(property, true);
+    }
 }
 
 $(".icon-bold").click(function(){
-    if($(this).hasClass("selected")){
-        updateCell("font-weight","");
-    }
-    else{
-        updateCell("font-weight", "bold");
-    }
+    setFontStyle(this, "bold","font-weight","bold");
 })
 
 $(".icon-italic").click(function(){
-    if($(this).hasClass("selected")){
-        updateCell("font-style","");
-    }
-    else{
-        updateCell("font-style", "italic");
-    }
+    setFontStyle(this, "italic","font-style","italic");
 })
 $(".icon-underline").click(function(){
-    if($(this).hasClass("selected")){
-        updateCell("text-decoration","");
-    }
-    else{
-        updateCell("text-decoration", "underline");
-    }
+    setFontStyle(this, "underline","text-decoration","underline");
 })
 
 let mousemoved = false;
