@@ -217,8 +217,9 @@ body {
     outline-color: #107c41;
     font-size: 14px;
     font-family: 'Noto Sans';
-    display: flex;
-    align-items: center;
+    display:flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .input-cell.selected {

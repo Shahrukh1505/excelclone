@@ -1,15 +1,23 @@
 
 let defaultProperties = {
     text: "",
-    "font-weight": "",
-    "font-style": "",
-    "text-decoration": "",
+    "bold": false,
+    "italic": false,
+    "underlined": false,
     "text-align": "left",
     "background-color": "white",
     "color": "black",
     "font-family": "Noto Sans",
     "font-size": 14
 }
+let cellData = {
+    "Sheet1" : {
+
+    }
+}
+
+let selectedSheet = "Sheet1";
+let totalSheets = 1;
 
 $( document ).ready(function() {
     let cellContainer = $(".input-cell-container");
@@ -152,6 +160,34 @@ $( document ).ready(function() {
          }
          
          $(ele).addClass("selected");
+         changeHeader(ele);
+    }
+
+    function changeHeader(ele){
+        let [rowId,colId] = findRowCol(ele);
+        let data = defaultProperties;
+        if(cellData[selectedSheet][rowId-1] && cellData[selectedSheet][rowId-1][colId-1]){
+        data = cellData[selectedSheet][rowId-1][colId-1];
+        }
+        addRemoveSelectFromFontStyle(data, "bold");
+    addRemoveSelectFromFontStyle(data, "italic");
+    addRemoveSelectFromFontStyle(data, "underlined");
+    }
+    function addRemoveSelectFromFontStyle(data, property) {
+        if(property.localeCompare("underlined") != 0){
+        if (data[property]) {
+            $(`.icon-${property}`).addClass("selected");
+        } else {
+            $(`.icon-${property}`).removeClass("selected");
+        }
+    }
+    else{
+        if (data[property]) {
+            $(`.underlined`).addClass("selected");
+        } else {
+            $(`.underlined`).removeClass("selected");
+        }
+    }
     }
 
     $(".input-cell").click(function (e) {
@@ -201,18 +237,21 @@ function updateCell(property, value) {
                 cellData[selectedSheet][rowId - 1] = {};
                 cellData[selectedSheet][rowId - 1][colId - 1] = { ...defaultProperties};
                 cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+                console.log(cellData[selectedSheet][rowId - 1][colId - 1]);
             } else {
                 if (cellData[selectedSheet][rowId - 1][colId - 1] == undefined) {
                     cellData[selectedSheet][rowId - 1][colId - 1] = { ...defaultProperties};
                     cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+                    console.log(cellData[selectedSheet][rowId - 1][colId - 1]);
                 } else {
                     cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+                    console.log(cellData[selectedSheet][rowId - 1][colId - 1]);
                 }
             }
         });
     } else {
         $(".input-cell.selected").each(function (index, data) {
-            let [rowId, colId] = findRowCOl(data);
+            let [rowId, colId] = findRowCol(data);
             if (cellData[selectedSheet][rowId - 1] && cellData[selectedSheet][rowId - 1][colId - 1]) {
                 cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
                 if (JSON.stringify(cellData[selectedSheet][rowId - 1][colId - 1]) == JSON.stringify(defaultProperties)) {
@@ -224,9 +263,9 @@ function updateCell(property, value) {
             }
         });
     }
-    if (saved && JSON.stringify(cellData) != prevCellData) {
-        saved = false;
-    }
+    // if (saved && JSON.stringify(cellData) != prevCellData) {
+    //     saved = false;
+    // }
 }
 function setFontStyle(ele, property, key, value) {
     if ($(ele).hasClass("selected")) {
@@ -236,7 +275,7 @@ function setFontStyle(ele, property, key, value) {
         //     let [rowId, colId] = findRowCOl(data);
         //     cellData[selectedSheet][rowId - 1][colId - 1][property] = false;
         // });
-        updateCell(property, false);
+        updateCell(property, false); //since we are reaching closer to te default property delete it from cell data
     } else {
         $(ele).addClass("selected");
         $(".input-cell.selected").css(key, value);
@@ -255,10 +294,19 @@ $(".icon-bold").click(function(){
 $(".icon-italic").click(function(){
     setFontStyle(this, "italic","font-style","italic");
 })
-$(".icon-underline").click(function(){
-    setFontStyle(this, "underline","text-decoration","underline");
+$(".underlined").click(function(){
+    setFontStyle(this, "underlined","text-decoration","underline");
 })
 
+$(".align-icon").click(function(){
+      $(".align-icon.selected").removeClass("selected");
+      $(this).addClass("selected");
+      let alignment = $(this).attr("data-type").toString();
+     
+      $(".input-cell.selected").css("text-align",alignment);
+    
+      updateCell("text-align",alignment);
+    })
 let mousemoved = false;
 let startCellStored = false;
 let startCell;
