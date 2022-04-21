@@ -18,7 +18,7 @@ let cellData = {
 
 let selectedSheet = "Sheet1";
 let totalSheets = 1;
-
+let lastlyAddedSheet = 1;
 $( document ).ready(function() {
     let cellContainer = $(".input-cell-container");
    
@@ -384,6 +384,95 @@ $(".font-size-selector").change(function(){
     
     updateCell("font-size",$(this).val());
 })
+
+
 });
+
+//function to empty the current sheet
+function emptySheet() {
+    let data = cellData[selectedSheet];
+    let rowKeys = Object.keys(data);
+    for (let i of rowKeys) {
+        let rowId = parseInt(i);
+        let colKeys = Object.keys(data[rowId]);
+        for (let j of colKeys) {
+            let colId = parseInt(j);
+            let cell = $(`#row-${rowId + 1}-col-${colId + 1}`); // first cell that have changes
+            cell.text("");
+            cell.css({
+                "font-family": "Noto Sans",
+                "font-size": 14,
+                "background-color": "#fff",
+                "color": "#444",
+                "font-weight": "",
+                "font-style": "",
+                "text-decoration": "",
+                "text-align": "left"
+            });
+        }
+    }
+}
+//function to load the old data of the sheet
+function loadSheet() {
+    let data = cellData[selectedSheet];
+    let rowKeys = Object.keys(data);
+    for (let i of rowKeys) {
+        let rowId = parseInt(i);
+        let colKeys = Object.keys(data[rowId]);
+        for (let j of colKeys) {
+            let colId = parseInt(j);
+            let cell = $(`#row-${rowId + 1}-col-${colId + 1}`); // first cell that have changes
+            console.log(data[rowId][colId].text);
+            cell.text(data[rowId][colId].text);
+            cell.css({
+                "font-family": data[rowId][colId]["font-family"],
+                "font-size": data[rowId][colId]["font-size"],
+                "background-color": data[rowId][colId]["background-color"],
+                "color": data[rowId][colId]["color"],
+                "font-weight": data[rowId][colId].bold ? "bold" : "",
+                "font-style": data[rowId][colId].italic ? "italic" : "",
+                "text-decoration": data[rowId][colId].underlined ? "underline" : "",
+                "text-align": data[rowId][colId]["text-align"],
+            });
+        }
+    }
+}
+
+$(".icon-add").click(function(){
+    emptySheet();
+    $(".sheet-tab.selected").removeClass("selected");
+    let sheetName = "Sheet" + (lastlyAddedSheet + 1);
+    console.log(sheetName);
+    cellData[sheetName] = {};
+    totalSheets += 1;
+    lastlyAddedSheet += 1;
+    selectedSheet = sheetName;
+    $(".sheet-tab-container").append(`<div class = "sheet-tab selected">${sheetName}</div>`)
+    $(".sheet-tab.selected").click(function(){
+        if(!$(this).hasClass("selected")){
+            selectSheet(this);
+        }
+    })
+
+})
+
+$(".sheet-tab").click(function(){
+    if(!$(this).hasClass("selected")){
+        selectSheet(this);
+    }
+})
+
+function selectSheet(ele){
+    $(".sheet-tab.selected").removeClass("selected");
+    $(ele).addClass("selected");
+    emptySheet();
+    selectedSheet = $(ele).text();
+    loadSheet();
+}
+
+$(".sheet-tab").bind("contextmenu", function(e){
+    e.preventDefault();
+    console.log(e);
+})
 
 // 

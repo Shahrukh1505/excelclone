@@ -173,8 +173,16 @@ body {
     border-right: 1px solid lightgray;
 }
 
+.sheet-tab:hover {
+    cursor: pointer;
+    background-color: lightgray;
+}
 .sheet-tab.selected {
     border-bottom: 4px solid #107c41;
+}
+.sheet-tab.selected:hover{
+    cursor:default;
+    background-color: #fff;
 }
 
 .sheet-tab:hover {
