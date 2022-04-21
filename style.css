@@ -271,3 +271,18 @@ body {
 .input-cell.left-selected {
     border-left: none;
 }
+
+.color-picker {
+    position: absolute;
+    width: 26px;
+    height: 12px;
+    border: none;
+    padding: 0;
+    top: 25px;
+    left: 8.5px;
+    cursor: pointer;
+}
+
+.icon-color-fill, .icon-color-text {
+    position: relative;
+}

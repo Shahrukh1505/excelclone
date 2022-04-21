@@ -5,10 +5,10 @@ let defaultProperties = {
     "italic": false,
     "underlined": false,
     "text-align": "left",
-    "background-color": "white",
-    "color": "black",
+    "background-color": "#ffffff",
+    "color": "#000000",
     "font-family": "Noto Sans",
-    "font-size": 14
+    "font-size": "14px"
 }
 let cellData = {
     "Sheet1" : {
@@ -169,9 +169,17 @@ $( document ).ready(function() {
         if(cellData[selectedSheet][rowId-1] && cellData[selectedSheet][rowId-1][colId-1]){
         data = cellData[selectedSheet][rowId-1][colId-1];
         }
+        $(".align-icon.selected").removeClass("selected");
+        $(`.align-icon[data-type=${data["text-align"]}]`).addClass("selected");
         addRemoveSelectFromFontStyle(data, "bold");
     addRemoveSelectFromFontStyle(data, "italic");
     addRemoveSelectFromFontStyle(data, "underlined");
+    $(".background-color-picker").val(data["background-color"]);
+    $(".text-color-picker").val(data["color"]);
+    $(".font-family-selector").val(data["font-family"]);
+    $(".font-family-selector").css("font-family", data["font-family"]);
+    $(".font-size-selector").val(data["font-size"]);
+    $(".font-size-selector").css("font-size", data["font-size"]);
     }
     function addRemoveSelectFromFontStyle(data, property) {
         if(property.localeCompare("underlined") != 0){
@@ -218,6 +226,7 @@ $( document ).ready(function() {
 
     $(".input-cell").blur(function(){
         $(".input-cell.selected").attr("contenteditable", "false");
+        updateCell("text",$(this).text());
     })
 
     $(".input-cell-container").scroll(function(){
@@ -347,5 +356,34 @@ function selectAllBetweenTheRange(start, end){
     }
 }
 
+$(".color-fill-icon").click(function(){
+    $(".background-color-picker").click();
+})
 
+$(".color-fill-text").click(function(){
+    $(".text-color-picker").click();
+})
+
+$(".background-color-picker").change(function(){
+    $(".input-cell.selected").css("background-color",$(this).val());
+    updateCell("background-color", $(this).val());
+})
+
+$(".text-color-picker").change(function(){
+    $(".input-cell.selected").css("color",$(this).val());
+    updateCell("color", $(this).val());
+})
+
+$(".font-family-selector").change(function(){
+    $(".input-cell.selected").css("font-family",$(this).val());
+    $(".font-family-selector").css("font-family",$(this).val());
+    updateCell("font-family",$(this).val());
+})
+$(".font-size-selector").change(function(){
+    $(".input-cell.selected").css("font-size",$(this).val());
+    
+    updateCell("font-size",$(this).val());
+})
 });
+
+// Book-1 Excel
