@@ -18,7 +18,7 @@ let cellData = {
 
 let selectedSheet = "Sheet1";
 let totalSheets = 1;
-let lastlyAddedSheet = 1;
+let lastlyAddedSheetNumber = 1;
 $( document ).ready(function() {
     let cellContainer = $(".input-cell-container");
    
@@ -347,7 +347,7 @@ $(".input-cell").mousemove(function(event){
    
 })
 
-function selectAllBetweenTheRange(start, end){
+function selectAllBetweenTheRange(start, end) {
     for (let i = (start.rowId < end.rowId ? start.rowId : end.rowId); i <= (start.rowId < end.rowId ? end.rowId : start.rowId); i++) {
         for (let j = (start.colId < end.colId ? start.colId : end.colId); j <= (start.colId < end.colId ? end.colId : start.colId); j++) {
             let [topCell, bottomCell, leftCell, rightCell] = getTopBottomLeftRightCell(i, j);
@@ -385,9 +385,66 @@ $(".font-size-selector").change(function(){
     updateCell("font-size",$(this).val());
 })
 
+function loadNewSheet() {
+    $(".input-cell-container").text("");
+    for (let i = 1; i <= 100; i++) {
+        let row = $('<div class="cell-row"></div>');
+        for (let j = 1; j <= 100; j++) {
+            row.append(`<div id="row-${i}-col-${j}" class="input-cell" contenteditable="false"></div>`);
+        }
+        $(".input-cell-container").append(row);
+    }
+    addEventsToCells();
+    addSheetTabEventListeners();
+}
 
-});
+loadNewSheet();
 
+function addEventsToCells(){
+    $(".input-cell").dblclick(function () {
+        $(this).attr("contenteditable", "true");
+        $(this).focus();
+    });
+
+    $(".input-cell").blur(function () {
+        $(this).attr("contenteditable", "false");
+        // cellData[selectedSheet][rowId - 1][colId - 1].text = $(this).text();
+        updateCell("text", $(this).text());
+        console.log(cellData);
+    });
+
+    $(".input-cell").click(function (e) {
+        let [rowId, colId] = findRowCol(this);
+        let [topCell, bottomCell, leftCell, rightCell] = getTopBottomLeftRightCell(rowId, colId);
+
+
+        if ($(this).hasClass("selected") && e.ctrlKey) {
+            unselectCell(this, e, topCell, bottomCell, leftCell, rightCell)
+        } else {
+            selectCell(this, e, topCell, bottomCell, leftCell, rightCell);
+        }
+
+    });
+    $(".input-cell").mousemove(function (event) {
+        event.preventDefault();
+        if (event.buttons == 1 && !event.ctrlKey) {
+            $(".input-cell.selected").removeClass("selected top-selected bottom-selected right-selected left-selected");
+            mousemoved = true;
+            if (!startCellStored) {
+                let [rowId, colId] = findRowCol(event.target);
+                startCell = { rowId: rowId, colId: colId };
+                startCellStored = true;
+            } else {
+                let [rowId, colId] = findRowCol(event.target);
+                endCell = { rowId: rowId, colId: colId };
+                selectAllBetweenTheRange(startCell, endCell);
+            }
+        } else if (event.buttons == 0 && mousemoved) {
+            startCellStored = false;
+            mousemoved = false;
+        }
+    })
+}
 //function to empty the current sheet
 function emptySheet() {
     let data = cellData[selectedSheet];
@@ -436,30 +493,58 @@ function loadSheet() {
             });
         }
     }
+    addEventsToCells();
 }
 
 $(".icon-add").click(function(){
     emptySheet();
-    $(".sheet-tab.selected").removeClass("selected");
-    let sheetName = "Sheet" + (lastlyAddedSheet + 1);
-    console.log(sheetName);
-    cellData[sheetName] = {};
     totalSheets += 1;
-    lastlyAddedSheet += 1;
-    selectedSheet = sheetName;
-    $(".sheet-tab-container").append(`<div class = "sheet-tab selected">${sheetName}</div>`)
-    $(".sheet-tab.selected").click(function(){
-        if(!$(this).hasClass("selected")){
-            selectSheet(this);
-        }
-    })
+    lastlyAddedSheetNumber += 1;
 
+    while(Object.keys(cellData).includes("Sheet" + lastlyAddedSheetNumber)){
+        lastlyAddedSheetNumber++;
+    }
+
+    cellData[`Sheet${lastlyAddedSheetNumber}`] = {};
+    selectedSheet = `Sheet${lastlyAddedSheetNumber}`;
+
+    $(".sheet-tab.selected").removeClass("selected");
+    $(".sheet-tab-container").append(`<div class = "sheet-tab selected">Sheet${lastlyAddedSheetNumber}</div>`);
+    
+    addSheetTabEventListeners();
+    $("#row-1-col-1").click();
 })
 
-$(".sheet-tab").click(function(){
-    if(!$(this).hasClass("selected")){
+function addSheetTabEventListeners(){
+    $(".sheet-tab.selected").bind("contextmenu", function (e) {
+        e.preventDefault();
         selectSheet(this);
-    }
+        $(".sheet-options-modal").remove();
+        let modal = $(`<div class="sheet-options-modal">
+                            <div class="option sheet-rename">Rename</div>
+                            <div class="option sheet-delete">Delete</div>
+                        </div>`);
+        $(".container").append(modal);
+        $(".sheet-options-modal").css({ "bottom": 0.04 * $(".container").height(), "left": e.pageX });
+    })
+
+    $(".sheet-tab.selected").click(function (e) {
+        if (!$(this).hasClass("selected")) {
+            selectSheet(this);
+            $("#row-1-col-1").click();
+        }
+    });
+}
+
+$(".container").click(function (e) {
+    $(".sheet-options-modal").remove();
+});
+$(".sheet-tab").click(function(){
+   if(!$(this).hasClass("selected")){
+        selectSheet(this);
+
+   }
+  
 })
 
 function selectSheet(ele){
@@ -470,9 +555,10 @@ function selectSheet(ele){
     loadSheet();
 }
 
-$(".sheet-tab").bind("contextmenu", function(e){
-    e.preventDefault();
-    console.log(e);
-})
+
+
+});
+
+
 
 // 
