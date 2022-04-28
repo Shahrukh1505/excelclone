@@ -18,6 +18,7 @@ let cellData = {
 
 let selectedSheet = "Sheet1";
 let totalSheets = 1;
+let saved = true;
 let lastlyAddedSheetNumber = 1;
 $( document ).ready(function() {
     let cellContainer = $(".input-cell-container");
@@ -272,9 +273,9 @@ function updateCell(property, value) {
             }
         });
     }
-    // if (saved && JSON.stringify(cellData) != prevCellData) {
-    //     saved = false;
-    // }
+    if (saved && JSON.stringify(cellData) != prevCellData) {
+        saved = false;
+    }
 }
 function setFontStyle(ele, property, key, value) {
     if ($(ele).hasClass("selected")) {
@@ -513,12 +514,42 @@ $(".icon-add").click(function(){
     
     addSheetTabEventListeners();
     $("#row-1-col-1").click();
+    saved = false;
 })
 
+function renameSheet() {
+    let newSheetName = $(".sheet-modal-input").val();
+    if(newSheetName && !Object.keys(cellData).includes(newSheetName)){
+        //need to change
+
+        let newCellData = {};
+
+        for(let i of Object.keys(cellData)){
+            if(i == selectedSheet){
+                newCellData[newSheetName] = cellData[i];
+            }
+            else{
+                newCellData[i] = cellData[i];
+            }
+        }
+
+        cellData = newCellData;
+        selectedSheet = newSheetName;
+        $(".sheet-tab.selected").text(newSheetName);
+        $(".sheet-modal-parent").remove();
+        saved = false;
+    }
+
+    else{
+        $(".error").remove();
+        $(".sheet-modal-input-container").append(`
+        <div class="error"> Sheet Name is not Valid or Sheet already exists! </div>`
+        );
+    }
+}
 function addSheetTabEventListeners(){
     $(".sheet-tab.selected").bind("contextmenu", function (e) {
         e.preventDefault();
-        selectSheet(this);
         $(".sheet-options-modal").remove();
         let modal = $(`<div class="sheet-options-modal">
                             <div class="option sheet-rename">Rename</div>
@@ -526,7 +557,85 @@ function addSheetTabEventListeners(){
                         </div>`);
         $(".container").append(modal);
         $(".sheet-options-modal").css({ "bottom": 0.04 * $(".container").height(), "left": e.pageX });
-    })
+       
+        $(".sheet-rename").click(function (e) {
+            let renameModal = `<div class="sheet-modal-parent">
+            <div class="sheet-rename-modal">
+                <div class="sheet-modal-title">
+                    <span>Rename Sheet</span>
+                </div>
+                <div class="sheet-modal-input-container">
+                    <span class="sheet-modal-input-title">Rename Sheet to:</span>
+                    <input class="sheet-modal-input" type="text" />
+                </div>
+                <div class="sheet-modal-confirmation">
+                    <div class="button ok-button">OK</div>
+                    <div class="button cancel-button">Cancel</div>
+                </div>
+            </div>
+        </div>`;
+            $(".container").append(renameModal);
+            $(".cancel-button").click(function (e) {
+                $(".sheet-modal-parent").remove();
+            });
+            $(".ok-button").click(function (e) {
+                renameSheet();
+            });
+            $(".sheet-modal-input").keypress(function (e) {
+                if (e.key == "Enter") {
+                    renameSheet();
+                }
+            })
+        });
+
+        $(".sheet-delete").click(function (e) {
+            let deleteModal = `<div class="sheet-modal-parent">
+            <div class="sheet-delete-modal">
+                <div class="sheet-modal-title">
+                    <span>${$(".sheet-tab.selected").text()}</span>
+                </div>
+                <div class="sheet-modal-detail-container">
+                    <span class="sheet-modal-detail-title">Are you sure?</span>
+                </div>
+                <div class="sheet-modal-confirmation">
+                    <div class="button delete-button">
+                        <div class="material-icons delete-icon">delete</div>
+                        Delete
+                    </div>
+                    <div class="button cancel-button">Cancel</div>
+                </div>
+            </div>
+        </div>`;
+            $(".container").append(deleteModal);
+            $(".cancel-button").click(function (e) {
+                $(".sheet-modal-parent").remove();
+            });
+            $(".delete-button").click(function (e) {
+                if (totalSheets > 1) {
+                    $(".sheet-modal-parent").remove();
+                    let keysArray = Object.keys(cellData);
+                    let selectedSheetIndex = keysArray.indexOf(selectedSheet);
+                    let currentSelectedSheet = $(".sheet-tab.selected");
+                    if (selectedSheetIndex == 0) {
+                        selectSheet(currentSelectedSheet.next()[0]);
+                    } else {
+                        selectSheet(currentSelectedSheet.prev()[0]);
+                    }
+                    delete cellData[currentSelectedSheet.text()];
+                    currentSelectedSheet.remove();
+                    // selectSheet($(".sheet-tab.selected")[0]);
+                    totalSheets--;
+                    saved = false;
+                } else {
+                        alert("Sheet is 1. Can't be deleted!");
+                }
+                
+            })
+        })
+        if (!$(this).hasClass("selected")) {
+            selectSheet(this);
+        }
+    });
 
     $(".sheet-tab.selected").click(function (e) {
         if (!$(this).hasClass("selected")) {
@@ -536,16 +645,16 @@ function addSheetTabEventListeners(){
     });
 }
 
-$(".container").click(function (e) {
-    $(".sheet-options-modal").remove();
-});
-$(".sheet-tab").click(function(){
-   if(!$(this).hasClass("selected")){
-        selectSheet(this);
+// $(".container").click(function (e) {
+//     $(".sheet-options-modal").remove();
+// });
+// $(".sheet-tab").click(function(){
+//    if(!$(this).hasClass("selected")){
+//         selectSheet(this);
 
-   }
+//    }
   
-})
+// })
 
 function selectSheet(ele){
     $(".sheet-tab.selected").removeClass("selected");
@@ -555,7 +664,164 @@ function selectSheet(ele){
     loadSheet();
 }
 
+$(".menu-file").click(function(e){
+    let fileModal = $(`<div class="file-modal">
+                            <div class="file-options-modal">
+                                <div class="close">
+                                    <div class="material-icons close-icon">arrow_circle_down</div>
+                                    <div>Close</div>
+                                </div>
+                                <div class="new">
+                                    <div class="material-icons new-icon">insert_drive_file</div>
+                                    <div>New</div>
+                                </div>
+                                <div class="open">
+                                    <div class="material-icons open-icon">folder_open</div>
+                                    <div>Open</div>
+                                </div>
+                                <div class="save">
+                                    <div class="material-icons save-icon">save</div>
+                                    <div>Save</div>
+                                </div>
+                            </div>
+                            <div class="file-recent-modal">
+                            </div>
+                            <div class="file-transparent-modal"></div>
+                        </div>`);
+    $(".container").append(fileModal);
+    fileModal.animate({
+        "width": "100vw"
+    }, 300);
+    $(".close,.file-transparent-modal,.new,.save,.open").click(function (e) {
+        fileModal.animate({
+            "width": "0vw"
+        }, 300);
+        setTimeout(() => {
+            fileModal.remove();
+        }, 299);
+    });
+    $(".new").click(function (e) {
+        if (saved) {
+            newFile();
+        } else {
+            $(".container").append(`<div class="sheet-modal-parent">
+                                        <div class="sheet-delete-modal">
+                                            <div class="sheet-modal-title">
+                                                <span>${$(".title-bar").text()}</span>
+                                            </div>
+                                            <div class="sheet-modal-detail-container">
+                                                <span class="sheet-modal-detail-title">Do you want to save changes?</span>
+                                            </div>
+                                            <div class="sheet-modal-confirmation">
+                                                <div class="button ok-button">
+                                                    Save
+                                                </div>
+                                                <div class="button cancel-button">Cancel</div>
+                                            </div>
+                                        </div>
+                                    </div>`);
+            $(".ok-button").click(function (e) {
+                $(".sheet-modal-parent").remove();
+                saveFile(true);
+            });
+            $(".cancel-button").click(function (e) {
+                $(".sheet-modal-parent").remove();
+                newFile();
+            })
+        }
 
+    });
+
+    $(".save").click(function (e) {
+        saveFile();
+    });
+    $(".open").click(function (e) {
+        openFile();
+    })
+
+})
+
+function newFile() {
+    emptySheet();
+    $(".sheet-tab").remove();
+    $(".sheet-tab-container").append(`<div class="sheet-tab selected">Sheet1</div>`);
+    cellData = { "Sheet1": {} };
+    selectedSheet = "Sheet1";
+    totalSheets = 1;
+    lastlyAddedSheetNumber = 1;
+    addSheetTabEventListeners();
+    $("#row-1-col-1").click();
+}
+
+function saveFile(createNewFile) {
+    if (!saved) {
+        $(".container").append(`<div class="sheet-modal-parent">
+                                <div class="sheet-rename-modal">
+                                    <div class="sheet-modal-title">
+                                        <span>Save File</span>
+                                    </div>
+                                    <div class="sheet-modal-input-container">
+                                        <span class="sheet-modal-input-title">File Name:</span>
+                                        <input class="sheet-modal-input" value='${$(".title-bar").text()}' type="text" />
+                                    </div>
+                                    <div class="sheet-modal-confirmation">
+                                        <div class="button ok-button">Save</div>
+                                        <div class="button cancel-button">Cancel</div>
+                                    </div>
+                                </div>
+                            </div>`);
+        $(".ok-button").click(function (e) {
+            let fileName = $(".sheet-modal-input").val();
+            if (fileName) {
+                let href = `data:application/json,${encodeURIComponent(JSON.stringify(cellData))}`;
+                let a = $(`<a href=${href} download="${fileName}.json"></a>`);
+                $(".container").append(a);
+                a[0].click();
+                a.remove();
+                $(".sheet-modal-parent").remove();
+                saved = true;
+                if (createNewFile) {
+                    newFile();
+                }
+            }
+        });
+        $(".cancel-button").click(function (e) {
+            $(".sheet-modal-parent").remove();
+            if (createNewFile) {
+                newFile();
+            }
+        });
+    }
+}
+
+function openFile(){
+    let inputFile = $(`<input accept="application/json" type="file" />`);
+    $(".container").append(inputFile);
+    inputFile.click();
+    inputFile.change(function (e) {
+        let file = e.target.files[0];
+        $(".title-bar").text(file.name.split(".json")[0]);
+        let reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = function () {
+            emptySheet();
+            $(".sheet-tab").remove();
+            cellData = JSON.parse(reader.result);
+            let sheets = Object.keys(cellData);
+            for (let i of sheets) {
+                $(".sheet-tab-container").append(`<div class="sheet-tab selected">${i}</div>`)
+            }
+            addSheetTabEventListeners();
+            $(".sheet-tab").removeClass("selected");
+            $($(".sheet-tab")[0]).addClass("selected");
+            selectedSheet = sheets[0];
+            totalSheets = sheets.length;
+            lastlyAddedSheetNumber = totalSheets;
+            loadSheet();
+            inputFile.remove();
+        }
+    })
+}
 
 });
 
