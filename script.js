@@ -227,16 +227,10 @@ $(document).ready(function () {
   });
 
   $(".input-cell").blur(function () {
-    let [rowId, colId] = findRowCol(this);
+    
     $(".input-cell.selected").attr("contenteditable", "false");
     updateCell("text", $(this).text());
-    console.log(cellData[selectedSheet][rowId - 1][colId - 1]);
-    if (cellData[selectedSheet][rowId - 1][colId - 1].formula != "") {
-        updateStreams(this, []);
-    }
-    cellData[selectedSheet][rowId - 1][colId - 1].formula = "";
-    let selfColCode = calcColName(colId);
-    evalFormula(selfColCode + rowId);
+    
   });
 
   $(".input-cell-container").scroll(function () {
@@ -440,8 +434,15 @@ $(document).ready(function () {
     $(".input-cell").blur(function () {
       $(this).attr("contenteditable", "false");
       // cellData[selectedSheet][rowId - 1][colId - 1].text = $(this).text();
+      let [rowId, colId] = findRowCol(this);
       updateCell("text", $(this).text());
       console.log(cellData);
+      if (cellData[selectedSheet][rowId - 1][colId - 1].formula != "") {
+        updateStreams(this, []);
+    }
+    cellData[selectedSheet][rowId - 1][colId - 1].formula = "";
+    let selfColCode = calcColName(colId);
+    evalFormula(selfColCode + rowId);
     });
 
     $(".input-cell").click(function (e) {
