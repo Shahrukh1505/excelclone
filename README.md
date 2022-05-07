@@ -10,3 +10,9 @@ Excel clone using JQuery,HTML, CSS, Javascript
 
 https://user-images.githubusercontent.com/62403839/167250345-dda81733-5fc6-4740-8166-a2a94bd1d69e.mp4
 
+2. Cut, copy and paste functionality. Save excel sheet feature. Adding multiple sheets on your workspace and manipulating them. Uploading excel sheet
+
+
+
+https://user-images.githubusercontent.com/62403839/167256985-f96d1166-379a-45e1-a3f4-c20a72ab0bf6.mp4
+
