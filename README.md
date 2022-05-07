@@ -2,7 +2,7 @@
 
 Excel clone using JQuery,HTML, CSS, Javascript
 
-#Demo :
+# Demo :
 
 1. Add styles such as bold, italic, underline, alignment, font size, font family , text color and background color.
 
