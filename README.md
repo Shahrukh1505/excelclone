@@ -16,3 +16,5 @@ https://user-images.githubusercontent.com/62403839/167250345-dda81733-5fc6-4740-
 
 https://user-images.githubusercontent.com/62403839/167256985-f96d1166-379a-45e1-a3f4-c20a72ab0bf6.mp4
 
+3. Implemented excel formula as well as detect the cycle if present in the excel formula
+
