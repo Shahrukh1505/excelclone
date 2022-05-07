@@ -952,7 +952,7 @@ $(document).ready(function () {
         })
     }
     else {
-        alert("Please select a cell first ti apply formula");
+        alert("Please select a cell first to apply formula");
     }
 })
 
